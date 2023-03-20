@@ -1,12 +1,14 @@
 {% extends "layout.html" %}
 
-{% block title %}{% endblock %}
+{% block title %}Home{% endblock %}
 
-{% block page %}{% endblock %}
+{% block page %}Home{% endblock %}
 
 {% block link%}
 <ul id="nav-mobile" class="right">
     <li><a href="/logout">Logout</a></li>
+    <li><a href="/login">Login</a></li>
+    <li><a href="/Sign Up">Sign Up</a></li>
 </ul>
 {% endblock %}
 
@@ -15,21 +17,38 @@
 
 <div class="row">
     <div class="col m2 list-container collection" style="max-height: 84vh;">
-
+        <a href="/app/1" id="poke-1" class="collection-item active" >Bulbasaur</a> 
         <!-- edit to show all pokemon links but have only the selected pokemon as active -->
-        <div class="list-item">   
-            <a href="/app/1" id="poke-1" class="collection-item active" >Bulbasaur</a> 
+        <div class="list-item"> 
+        {% for pokemon in pokemons %} 
+            <a href="/app/{{ pokemon.id }}" id="poke-{{ pokemon.id }}" class="collection-item" >{{ pokemon.name }}</a>
+        {% endfor %}
         </div>
+            
+        <script>
+                var activeLink = document.getElementById("poke-{{ pokemon_id }}");
+                activeLink.classList.add("active");  
+        </script>
     
     </div>
-    
+
     <div class="col m3">
 
         <p class="text-center">Selected Pokemon</p>
 
         <div class="card">
             <!-- Selected Pokemon Content Here -->
-        </div>
+            {% for pokes in poke %}
+             <ul class="collection-item">
+                <form  method="GET" action="toggle/{{pokes.id}}" >
+                <class= "card">
+                <img  src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/{{pokes.id}}.png"/>
+                <span class="card-title">{{pokes.name}}
+                </span>
+                </form>
+            </ul>
+        {% endfor %}
+         </div>
     </div>
 
     <div class="col m7">
