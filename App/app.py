@@ -40,15 +40,63 @@ def login():
 
 @app.route("/app", methods=['GET'])
 @app.route("/app/<int:pokemon_id>", methods=['GET'])
+@login_required
 # add @login_required decorator to require login
 def home_page(pokemon_id=1):
+  poke = Pokemon.query.filter_by(id = pokemon_id).all()
+  pokemons = Pokemon.query.all()
+  if pokemons is None:
+    flash('Invalid id or unauthorized')
+  else:
+     return render_template("home.html", pokemons = pokemons,poke=poke)
     #pass relevant data to template
-    return render_template("home.html")
 
 # Form Action Routes
+@app.route('/', methods=['GET'])
+@app.route('/signup', methods=['GET'])
+def signup_page():
+  return render_template('signup.html')
+
+@app.route('/', methods=['GET'])
+@app.route('/login', methods=['GET'])
+def login_page():
+  return render_template('login.html')
+
+@app.route('/signup', methods=['POST'])
+def signup_action():
+  data = request.form  # get data from form submission
+  newuser = User(username=data['username'], email=data['email'], password=data['password'])  # create user object
+  try:
+    db.session.add(newuser)
+    db.session.commit()  # save user
+    login_user(newuser)  # login the user
+    flash('Account Created!')  # send message
+    return redirect(url_for('home_page'))  # redirect to homepage
+  except Exception:  # attempted to insert a duplicate user
+    db.session.rollback()
+    flash("username or email already exists")  # error message
+  return redirect(url_for('login_page'))
 
 
+@app.route('/login', methods=['POST'])
+def login_action():
+  data = request.form
+  user = User.query.filter_by(username=data['username']).first()
+  if user and user.check_password(data['password']):  # check credentials
+    flash('Logged in successfully.')  # send message to next page
+    login_user(user)  # login the user
+    return redirect('/app')  # redirect to main page if login successful
+  else:
+    flash('Invalid username or password')  # send message to next page
+  return redirect('/')
 
+@app.route('/logout', methods=['GET'])
+@login_required
+def logout_action():
+  logout_user()
+  flash('Logged Out')
+  return redirect(url_for('home_page'))
 
 if __name__ == "__main__":
   app.run(host='0.0.0.0', port=81)
+
